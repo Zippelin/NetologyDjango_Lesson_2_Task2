@@ -3,6 +3,9 @@ from django.shortcuts import render, redirect
 from django.urls import reverse
 import csv
 
+from django.utils.http import urlencode
+from urllib.parse import urlparse, urlunparse
+
 
 def index(request):
     return redirect(reverse(bus_stations))
@@ -27,11 +30,21 @@ def bus_stations(request):
         page = paginator.page(1)
         current_page = 1
 
+    url_schema = list(urlparse(reverse('bus_stations')))
+
     if page.has_next():
-        next_page_url = "%s?page=%s" % (reverse('bus_stations'), page.next_page_number())
+        # var.1
+        # next_page_url = '?'.join((reverse('bus_stations'), urlencode({'page': page.next_page_number()})))
+        # var.2
+        url_schema[4] = urlencode({'page': page.next_page_number()})
+        next_page_url = urlunparse(url_schema)
 
     if page.has_previous():
-        prev_page_url = "%s?page=%s" % (reverse('bus_stations'), page.previous_page_number())
+        # var.1
+        # prev_page_url = '?'.join((reverse('bus_stations'), urlencode({'page': page.previous_page_number()})))
+        # var.2
+        url_schema[4] = urlencode({'page': page.previous_page_number()})
+        prev_page_url = urlunparse(url_schema)
 
     return render(request, 'index.html', context={
         'bus_stations': paginator.page(current_page),
